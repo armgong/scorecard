@@ -1,3 +1,25 @@
+# scorecard 0.2.3.999
+
+* fixed a bug in woebin when only NA and special values
+* remove 'missing' value from breaks_list if it exists.
+
+# scorecard 0.2.3
+
+* add var_skip argument in woebin function, and var_kp argument in scorecard_ply function. Therefore, the id column can be handle during the development of scorecard model.
+* fixed a typo in perf_eva function
+* replace !isFalse(x) with isTRUE(x) & !is.null(x) in perf_eva function. The isFalse function is only available after R3.5. 
+
+# scorecard 0.2.2
+
+* fixed a bug in check_y function when the name of label column is 'y' in input data.
+* fixed a bug in woebin_adj function when count_distr_limit is not default value in woebin function.
+
+# scorecard 0.2.1
+
+* revised one_hot function
+* modified .export used in foreach loop
+* add my name in license file
+
 # scorecard 0.2.0
 
 * fixed a bug is woebin function cant modify positive values
@@ -8,13 +30,14 @@
 * revised perf_eva and perf_psi functions
 * added a vif function
 * added a report function to create report for scorecard modeling
+* added a scorecard2 function, which donot requires a glm model object in inputs
 
 # scorecard 0.1.9
 
 * pdo in scorecard function now supports negative value. If pdo is positive, the larger score means the lower probability to be positive sample. If pdo is negative, the larger score means the higher probability to be positive sample.
 * fixed a bug in woebin function using chimerge method, which is caused by initial breaks have out-range values.
 * added a check function on the length of unique values in string columns, which might cause the binning process slow.
-* fixed a bug in perf_eva function which is caused by the nrow of plot is setted to 0 when the length of plot type is one.
+* fixed a bug in perf_eva function which is caused by the nrow of plot is set to 0 when the length of plot type is one.
 * the ratio argument in split_df function supports to set ratios for both train and test.
 * If the argument return_rm_reason is TRUE in var_filter function, the info_value, missing_rate and identical_rate are provided in the result.
 

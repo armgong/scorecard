@@ -5,7 +5,7 @@
 \title{PSI}
 \usage{
 perf_psi(score, label = NULL, title = NULL, show_plot = TRUE,
-  positive = "bad|1", threshold_variable = 20, ...)
+  positive = "bad|1", threshold_variable = 20, var_skip = NULL, ...)
 }
 \arguments{
 \item{score}{A list of credit score for actual and expected data samples. For example, score = list(actual = scoreA, expect = scoreE).}
@@ -20,10 +20,12 @@ perf_psi(score, label = NULL, title = NULL, show_plot = TRUE,
 
 \item{threshold_variable}{Integer. Default is 20. If the number of unique values > threshold_variable, the provided score will be counted as total credit score, otherwise, it is variable score.}
 
+\item{var_skip}{Name of variables that are not score, such as id column. It should be the same with the var_kp in scorecard_ply function. Default is NULL.}
+
 \item{...}{Additional parameters.}
 }
 \value{
-A dataframe of psi and graphics of credit score distribution
+A data frame of psi and graphics of credit score distribution
 }
 \description{
 \code{perf_psi} calculates population stability index (PSI) for both total credit score and variables. It can also creates graphics to display score distribution and bad rate trends.
@@ -40,6 +42,7 @@ data("germancredit")
 dt_f = var_filter(germancredit, "creditability")
 # breaking dt into train and test
 dt_list = split_df(dt_f, "creditability")
+label_list = lapply(dt_list, function(x) x$creditability)
 
 # woe binning ------
 bins = woebin(dt_list$train, "creditability")
@@ -74,7 +77,6 @@ perf_eva(pred = pred_list$train, label=dt_list$train$creditability, title = 'tra
 # perf_eva(pred = score_list$train, label=dt_list$train$creditability, title = 'train')
 
 # Example II, multiple datsets
-label_list = lapply(dt_list, function(x) x$creditability)
 ## predicted p1
 perf_eva(pred = pred_list, label = label_list)
 ## predicted score
@@ -84,19 +86,19 @@ perf_eva(pred = pred_list, label = label_list)
 ###### perf_psi examples ######
 # Example I # only total psi
 psi1 = perf_psi(score = score_list, label = label_list)
-psi1$psi  # psi dataframe
+psi1$psi  # psi data frame
 psi1$pic  # pic of score distribution
 
 # Example II # both total and variable psi
 psi2 = perf_psi(score = score_list, label = label_list)
-# psi2$psi  # psi dataframe
+# psi2$psi  # psi data frame
 # psi2$pic  # pic of score distribution
 
 
 ###### gains_table examples ######
-# Example I, score can be a list of score or pred
+# Example I, input score and label can be a list or a vector
+gains_table(score = score_list$train, label = label_list$train)
 gains_table(score = score_list, label = label_list)
-gains_table(score = pred_list, label = label_list)
 
 # Example II, specify the bins number and type
 gains_table(score = score_list, label = label_list, bin_num = 20)
@@ -104,5 +106,5 @@ gains_table(score = score_list, label = label_list, bin_type = 'width')
 }
 }
 \seealso{
-\code{\link{perf_eva}}
+\code{\link{perf_eva}} \code{\link{gains_table}}
 }

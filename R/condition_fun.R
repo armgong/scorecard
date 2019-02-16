@@ -56,7 +56,7 @@ rep_blank_na = function(dt) {
   dt = setDT(dt)
 
   if (any(dt == "", na.rm = TRUE)) {
-    warning("There are blank characters in the columns of \"", paste0(names(which(dt[,sapply(.SD, function(x) any(x=="",na.rm = T))])), collapse = ",") ,"\", which were replaced by NAs.")
+    warning(sprintf('The blank values are replaced with NAs in the following columns:\n%s', paste(names(which(dt[,sapply(.SD, function(x) any(x=="",na.rm = T))])), collapse = ", ")))
 
     dt[dt == ""] = NA
   }
@@ -65,7 +65,7 @@ rep_blank_na = function(dt) {
 }
 
 # check y
-check_y = function(dt, y, positive) {
+check_y = function(dt, y, positive="bad|1") {
   dt = setDT(dt)
   positive = as.character(positive)
   # dt[[y]]  = as.character(dt[[y]])
@@ -73,29 +73,29 @@ check_y = function(dt, y, positive) {
   # number of columns >= 2
   if (ncol(dt) <=1 & !is.null(ncol(dt))) stop("Incorrect inputs; dt should have at least two columns.")
   # length of y == 1
-  if (length(y) != 1) stop("Incorrect inputs; the length of \"",y,"\" != 1.")
+  if (length(y) != 1) stop("Incorrect inputs; the length of \"y\" != 1.")
   # exist of y column
   if (!(y %in% names(dt))) stop(paste0("Incorrect inputs; there is no \"", y, "\" column in dt."))
 
   # remove rows have missing values in y
-  if (dt[, anyNA(get(y))]) {
-    warning(paste0("There are NAs in ", y, ". The rows with NA in \"", y, "\" were removed from input data."))
-    dt = dt[!is.na(get(y))]
+  if (anyNA(dt[[y]])) {
+    warning(sprintf("There are NAs in %s. The rows with NAs in \"%s\" are removed from input data.", y, y))
+    dt = dt[!is.na(dt[[y]])]
   }
 
   # numeric to integer
-  if (dt[,class(get(y)) == 'numeric']) dt[, (y) := as.integer(get(y))]
+  if (class(dt[[y]]) == "numeric") dt[, (y) := lapply(.SD, as.integer), .SDcols = y]
   # factor to character
-  if (dt[,class(get(y)) == 'factor' ]) dt[, (y) := as.character(get(y))]
+  if (class(dt[[y]]) == "factor") dt[, (y) := lapply(.SD, as.character), .SDcols = y]
 
   # length of unique values in y
-  if (dt[, length(unique(get(y))) == 2]) {
-    if (dt[, any(grepl(positive, get(y)))]) {
-      y1 = dt[,get(y)]
+  if (length(unique(dt[[y]])) == 2) {
+    if (any(grepl(positive, dt[[y]]))) {
+      y1 = dt[[y]]
       y2 = ifelse(grepl(positive, y1), 1L, 0L)
       if (any(y1 != y2)) {
         dt[[y]] = y2
-        warning(paste0("The positive value in \"", y, "\" was replaced by 1 and negative value by 0."))
+        # warning(paste0("The positive value in \"", y, "\" was replaced by 1 and negative value by 0."))
       }
     } else {
       stop(paste0("Incorrect inputs; the positive value in \"", y, "\" is not specified"))
@@ -118,13 +118,13 @@ check_print_step = function(print_step) {
 }
 
 # x variable
-x_variable = function(dt, y, x) {
-  x_all = setdiff(names(dt), y)
+x_variable = function(dt, y, x, var_skip=NULL) {
+  x_all = setdiff(names(dt), c(y, var_skip))
 
   if (is.null(x)) x = x_all
 
   if ( length(setdiff(x,x_all)) > 0 ) {
-    warning(paste0("Incorrect inputs; the variables \n\"", paste0(setdiff(x,x_all), collapse = ","), "\"\n are not exist in input data, which are removed."))
+    warning(sprintf('Incorrect inputs; there are %s variables are not exist in the input data frame, which are removed from x. \n%s', length(setdiff(x, x_all)), paste(setdiff(x, x_all), collapse = ', ')) )
     x = intersect(x, x_all)
   }
 
@@ -138,10 +138,18 @@ check_breaks_list = function(breaks_list, xs) {
     if (is.character(breaks_list)) {
       breaks_list = eval(parse(text = breaks_list))
     }
-    if (!is.list(breaks_list)) {
+    if (!inherits(breaks_list, 'list')) {
       stop("Incorrect inputs; breaks_list should be a list.")
 
     } else {
+      # remove missing from breakpoints
+      breaks_list = lapply(breaks_list, function(x) {
+        x=setdiff(x, 'missing')
+        if (length(x)==0) x = NULL
+        return(x)
+      })
+
+      # check variable names
       xs_breakslist = names(breaks_list)
       if (!identical(xs_breakslist, xs)) {
 
@@ -209,3 +217,20 @@ sec_to_hms = function(sec) {
 
 
 
+# y to good bad
+# groupby or dcast
+# groupby is faster via data.table package
+y_to_goodbad = function(dt, y) {
+  # dt = data.table(x = rnorm(1e+8), y = sample(c(rep(0,9),1), 1e+8, replace = TRUE))
+  #
+  # system.time(
+  #   dcast(dt, x~y, fun=length, value.var = 'y')
+  # )
+  #
+  # system.time(
+  #   dt[, .(good=sum(y==0), bad=sum(y==1)), by=x]
+  # )
+
+
+
+}

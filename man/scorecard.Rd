@@ -21,7 +21,7 @@ scorecard(bins, model, points0 = 600, odds0 = 1/19, pdo = 50,
 \item{basepoints_eq0}{Logical, default is FALSE. If it is TRUE, the basepoints will equally distribute to each variable.}
 }
 \value{
-scorecard
+A scorecard data frame
 }
 \description{
 \code{scorecard} creates a scorecard based on the results from \code{woebin} and \code{glm}.
@@ -57,6 +57,12 @@ m = eval(m_step$call)
 # scorecard
 # Example I # creat a scorecard
 card = scorecard(bins, m)
+card2 = scorecard2(bins=bins, dt=germancredit, y='creditability',
+  x=c("status.of.existing.checking.account", "duration.in.month", "credit.history",
+   "purpose", "credit.amount", "savings.account.and.bonds",
+   "present.employment.since", "installment.rate.in.percentage.of.disposable.income",
+   "personal.status.and.sex", "other.debtors.or.guarantors", "property",
+   "age.in.years", "other.installment.plans", "housing"))
 
 # credit score
 # Example I # only total score
@@ -67,5 +73,5 @@ score2 = scorecard_ply(dt, card, only_total_score = F)
 }
 }
 \seealso{
-\code{\link{scorecard_ply}}
+\code{\link{scorecard2}} \code{\link{scorecard_ply}}
 }
